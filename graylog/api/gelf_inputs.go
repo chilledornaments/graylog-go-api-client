@@ -68,6 +68,58 @@ func (c *Client) CreateGraylogGELFUDPGlobalInput(item *GraylogGELFUDPGlobalInput
 	return id.ID, nil
 }
 
+func (c *Client) UpdateGraylogGELFUDPGlobalInput(item *GraylogGELFUDPGlobalInput, id string) error {
+
+	b, err := json.Marshal(item)
+
+	if err != nil {
+		log.Printf("Received error creating %s JSON %s", "UpdateGraylogGELFUDPGlobalInput", err.Error())
+		return err
+	}
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/system/inputs/%s", c.apiBaseURL, id), bytes.NewReader(b))
+	req.SetBasicAuth(c.token, "token")
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-type", "application/json")
+	req.Header.Add("X-Requested-By", "Terraform-Provider-Graylog")
+
+	if err != nil {
+		log.Printf("Received error creating %s HTTP request %s", "UpdateGraylogGELFUDPGlobalInput", err.Error())
+		return err
+	}
+
+	resp, err := c.httpClient.Do(req)
+
+	if err != nil {
+		log.Printf("Received error doing %s HTTP request %s", "UpdateGraylogGELFUDPGlobalInput", err.Error())
+		return err
+	}
+
+	rb, err := ioutil.ReadAll(resp.Body)
+	log.Printf("%s response status code: %d", "UpdateGraylogGELFUDPGlobalInput", resp.StatusCode)
+	log.Printf("%s response body: %s", "UpdateGraylogGELFUDPGlobalInput", string(rb))
+
+	defer resp.Body.Close()
+
+	if err != nil {
+		log.Printf("Received error reading %s HTTP response body %s", "UpdateGraylogGELFUDPGlobalInput", err.Error())
+		return err
+	}
+
+	switch s := resp.StatusCode; s {
+	case 401:
+		return ErrGraylogUnauthorized
+	case 415:
+		return ErrGraylogUnsupportedMedia
+	case 400:
+		return ErrGraylogBadRequest
+	case 404:
+		return ErrGraylogResourceNonExistent
+	}
+
+	return nil
+}
+
 func (c *Client) DeleteGraylogGELFUDPGlobalInput(id string) error {
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/system/inputs/%s", c.apiBaseURL, id), nil)
