@@ -8,15 +8,12 @@ type GraylogGELFUDPGlobalInputConfiguration struct {
 	Port                int    `json:"port"`
 	RecvBufferSize      int    `json:"recv_buffer_size"`
 }
+
 type GraylogGELFUDPGlobalInput struct {
 	Title         string                                 `json:"title"`
 	Type          string                                 `json:"type"`
 	Global        bool                                   `json:"global"`
 	Configuration GraylogGELFUDPGlobalInputConfiguration `json:"configuration"`
-}
-
-type GraylogInputCreateResponse struct {
-	ID string `json:"id"`
 }
 
 type GraylogGELFUDPGlobalInputGetResponse struct {
